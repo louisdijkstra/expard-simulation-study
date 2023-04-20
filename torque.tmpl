@@ -1,0 +1,19 @@
+#!/bin/bash
+<%
+resources$walltime = asInt(resources$walltime)
+resources$memory = asInt(resources$memory)
+resources$ncpus = if (is.null(resources$ncpus)) 1L else asInt(resources$ncpus, lower = 1L)
+-%>
+  
+  #PBS -N <%= resources$name %>
+  #PBS -o <%= log.file %>
+  #PBS -l walltime=<%= resources$walltime %>,nodes=1:ppn=<%= resources$ncpus %>,vmem=<%= resources$memory %>M
+  #PBS -q default
+  #PBS -j oe
+  <%= if (array.jobs) sprintf("#PBS -t 1-%i", nrow(jobs)) else "" %>
+
+## export value of DEBUGME environemnt var to slave
+##export DEBUGME=<%= Sys.getenv("DEBUGME") %>
+
+## run R
+Rscript -e 'batchtools::doJobCollection("<%= uri %>")'
