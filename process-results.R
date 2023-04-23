@@ -4,6 +4,69 @@ library(dplyr)
 # Function that take in the raw results stored 
 data <- readr::read_rds("results/raw-results.rds")
 
+# get the truth and the estimated models
+truth <- data$truth
+est <- data$estimates
+
+#' Determine different performance measures. The variable 'truth' is updated 
+#' with the results
+
+# Function for selecting the model based on the highest posterior distribution
+select_best_model_given_posterior <- function(est) { 
+  temp <- est %>% filter(posterior == max(est$posterior))  
+  if (nrow(temp) == 0) { 
+    return("no-association")
+  }
+  return(unique(temp$model))
+}
+
+# Determine whether there is a signal or not
+signal_yes_or_no <- function(e) { 
+  na <- e %>% filter(model == "no-association")
+  prob <- na$posterior
+  
+  # if NA, then there is simply no signal
+  if (is.na(prob)) { 
+    return(FALSE)  
+  }
+  
+  if (prob >= 0.5) { 
+    return(FALSE)
+  } else { 
+    return(TRUE)  
+  }
+}
+
+# store whether there is an effect or not (true model)
+truth$effect <- sapply(truth$risk_model, function(m) return(m == "no-association"))
+
+# store the selected model based on posterior distribution 
+truth$selected_model <- sapply(est, function(e) select_best_model_given_posterior(e))
+
+# determine whether there is a signal or not based on posterior distribution
+truth$signal <- sapply(est, function(e) signal_yes_or_no(e))
+
+
+
+
+#' COLLECT THE RESULTS --------------------------------------------------------- 
+
+
+
+pars <- data$truth 
+res <- data$estimates
+
+# combine into one big data frame
+res <- do.call(rbind.data.frame, res)
+
+tab <- dplyr::left_join(res, pars)#, by = "job.id")
+
+results <- list(
+  truth = pars, 
+  estimates = reduceResultsList() 
+)
+
+
 #' There are different 
 #'  * parameter settings for the simulation
 #'  * different versions of the weight matrix

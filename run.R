@@ -21,7 +21,7 @@ test_run <- TRUE
 
 # Total number of replications for each parameter setting
 if (test_run) { 
-  repls <- 2 
+  repls <- 5 
 } else { 
   repls <- 20
 }
