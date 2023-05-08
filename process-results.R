@@ -1,6 +1,8 @@
 library(readr)
 library(dplyr)
 
+source("parameter-settings.R")
+
 # Function that take in the raw results stored 
 data <- readr::read_rds("results/raw-results.rds")
 
@@ -46,6 +48,30 @@ truth$selected_model <- sapply(est, function(e) select_best_model_given_posterio
 # determine whether there is a signal or not based on posterior distribution
 truth$signal <- sapply(est, function(e) signal_yes_or_no(e))
 
+r <- truth %>% group_by(n_patients, simulation_time, min_chance_drug, avg_duration, 
+                   prob_guaranteed_exposed, min_chance, max_chance)
+
+r %>% mutate()
+
+expand.grid(
+  n_patients = c(10,20),
+  simulation_time = c(10),  
+  min_chance_drug = c(0.05), 
+  avg_duration = c(5), 
+  prob_guaranteed_exposed = c(1), 
+  min_chance = c(.01), 
+  max_chance = c(.9), 
+  risk_model = c(
+    'no-association',
+    'current-use',
+    'past-use',
+    'withdrawal',
+    'delayed',
+    'decaying',
+    'delayed+decaying',
+    'long-term'
+  )
+)
 
 
 
