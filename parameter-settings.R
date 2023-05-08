@@ -117,6 +117,8 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
     )
   )
   
+  only_sim_param <- sim_param %>% select(-risk_model)
+  
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "past-use", 

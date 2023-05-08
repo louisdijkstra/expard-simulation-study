@@ -48,29 +48,46 @@ truth$selected_model <- sapply(est, function(e) select_best_model_given_posterio
 # determine whether there is a signal or not based on posterior distribution
 truth$signal <- sapply(est, function(e) signal_yes_or_no(e))
 
-r <- truth %>% group_by(n_patients, simulation_time, min_chance_drug, avg_duration, 
-                   prob_guaranteed_exposed, min_chance, max_chance)
+# add a good label for every risk model ----------------------------------------
+return_risk_model_label <- function(row_results) { 
+  switch(as.character(row_results$risk_model), 
+         'no-association' = "no assocation", 
+         'current-use' = "current use", 
+         'past-use' = sprintf("past-use (delay = %d)", row_results$past),
+         'withdrawal' = sprintf("withdrawal (rate = %g)", row_results$rate),
+         'delayed' = sprintf("delayed (delay = %d, std = %d)", row_results$mu, row_results$sigma),
+         'decaying' = sprintf("decaying (rate = %g)", row_results$rate),
+         'delayed+decaying' = sprintf("delayed + decaying (delay = %d, std = %d, rate = %g)", 
+                                      row_results$mu, 
+                                      row_results$sigma, 
+                                      row_results$rate),
+         'long-term' = sprintf("long term (rate = %g, delay = %d)", row_results$rate, row_results$delay))  
+}
 
-r %>% mutate()
+return_risk_model_label(row_results)
+truth$label <- sapply(1:nrow(truth), function(i) return_risk_model_label(truth[i,]))
+
+r <- truth 
+r <- r %>% group_by(n_patients,
+               simulation_time ,  
+               min_chance_drug, 
+               avg_duration, 
+               prob_guaranteed_exposed, 
+               min_chance, 
+               max_chance)
+
+groups <- group_map(r, function(group, ...) group)
+
+
 
 expand.grid(
-  n_patients = c(10,20),
-  simulation_time = c(10),  
-  min_chance_drug = c(0.05), 
-  avg_duration = c(5), 
-  prob_guaranteed_exposed = c(1), 
-  min_chance = c(.01), 
-  max_chance = c(.9), 
-  risk_model = c(
-    'no-association',
-    'current-use',
-    'past-use',
-    'withdrawal',
-    'delayed',
-    'decaying',
-    'delayed+decaying',
-    'long-term'
-  )
+  n_patients,
+  simulation_time ,  
+  min_chance_drug, 
+  avg_duration, 
+  prob_guaranteed_exposed, 
+  min_chance, 
+  max_chance
 )
 
 
