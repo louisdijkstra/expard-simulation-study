@@ -97,13 +97,13 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_param <- dplyr::as_tibble(
     expand.grid(
-      n_patients = c(100, 1000, 10000),
-      simulation_time = c(20, 100),  
+      n_patients = c(1000, 10000),
+      simulation_time = c(100),  
       min_chance_drug = c(0.05), 
       avg_duration = c(5), 
-      prob_guaranteed_exposed = c(.1, .5, 1), 
+      prob_guaranteed_exposed = c(.1, 1), 
       min_chance = c(.01, 0.05), 
-      max_chance = c(.1, .25, .5, .9), 
+      max_chance = c(.1, .5, .9), 
       risk_model = c(
         'no-association',
         'current-use',
@@ -128,7 +128,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "withdrawal", 
-      rate = c(.5, 1, 2)
+      rate = c(.5, 1)
     ))
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
@@ -136,7 +136,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "delayed", 
-      mu = c(3, 10, 20), 
+      mu = c(2, 5), 
       sigma = c(2)
     ))
   
@@ -145,7 +145,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "decaying", 
-      rate = c(.5, 1, 2)
+      rate = c(.5, 1)
     ))
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
@@ -153,9 +153,9 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "delayed_decaying", 
-      mu = c(3, 10, 20), 
+      mu = c(10), 
       sigma = c(2), 
-      rate = c(.5, 1, 2)
+      rate = c(.5)
     ))
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
@@ -163,8 +163,8 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "long-term", 
-      rate = c(.5, 1, 2), 
-      delay = c(10, 20, 50)
+      rate = c(.25), 
+      delay = c(50)
     ))
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
