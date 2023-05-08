@@ -17,13 +17,13 @@ source("parameter-settings.R")
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- TRUE  
+test_run <- FALSE 
 
 # Total number of replications for each parameter setting
 if (test_run) { 
   repls <- 5 
 } else { 
-  repls <- 20
+  repls <- 100
 }
 
 # Setting up the repository ---------
@@ -91,18 +91,18 @@ waitForJobs()
 
 
 #' COLLECT THE RESULTS --------------------------------------------------------- 
-res <- reduceResultsList() 
+#res <- reduceResultsList() 
 
 # combine into one big data frame
-res <- do.call(rbind.data.frame, res)
+#res <- do.call(rbind.data.frame, res)
 
 # combine the results with the parameters for the job
-pars <- unwrap(getJobPars())
+#pars <- unwrap(getJobPars())
 
-tab <- dplyr::left_join(res, pars)#, by = "job.id")
+#tab <- dplyr::left_join(res, pars)#, by = "job.id")
 
 results <- list(
-  truth = pars, 
+  truth = unwrap(getJobPars()), 
   estimates = reduceResultsList() 
 )
 
@@ -110,7 +110,7 @@ results <- list(
 readr::write_rds(results, "results/raw-results.rds", compress = "gz")
 
 # post-process the results
-source("process-results.R")
+#source("process-results.R")
 
 # TODO create the plots
 #source("plots.R") 
