@@ -3,6 +3,7 @@ library(CVN)
 library(CVNSim)
 library(tidyverse)
 library(hmeasure)
+library(expard)
 
 options(batchtools.verbose = TRUE)
 options(stringsAsFactors = FALSE)
@@ -17,11 +18,11 @@ source("parameter-settings.R")
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- FALSE 
+test_run <- TRUE
 
 # Total number of replications for each parameter setting
 if (test_run) { 
-  repls <- 5 
+  repls <- 2
 } else { 
   repls <- 100
 }

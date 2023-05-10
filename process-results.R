@@ -1,5 +1,8 @@
 library(readr)
 library(dplyr)
+library(hmeasure)
+library(caret)
+
 
 source("parameter-settings.R")
 
@@ -49,11 +52,11 @@ truth$selected_model <- sapply(est, function(e) select_best_model_given_posterio
 truth$signal <- sapply(est, function(e) signal_yes_or_no(e))
 
 # add a good label for every risk model ----------------------------------------
-return_risk_model_label <- function(row_results) { 
+return_true_risk_model_label <- function(row_results) { 
   switch(as.character(row_results$risk_model), 
          'no-association' = "no assocation", 
          'current-use' = "current use", 
-         'past-use' = sprintf("past-use (delay = %d)", row_results$past),
+         'past-use' = sprintf("past use (delay = %d)", row_results$past),
          'withdrawal' = sprintf("withdrawal (rate = %g)", row_results$rate),
          'delayed' = sprintf("delayed (delay = %d, std = %d)", row_results$mu, row_results$sigma),
          'decaying' = sprintf("decaying (rate = %g)", row_results$rate),
@@ -64,17 +67,57 @@ return_risk_model_label <- function(row_results) {
          'long-term' = sprintf("long term (rate = %g, delay = %d)", row_results$rate, row_results$delay))  
 }
 
-return_risk_model_label(row_results)
-truth$label <- sapply(1:nrow(truth), function(i) return_risk_model_label(truth[i,]))
+return_selected_risk_model_label <- function(row_results) { 
+  switch(as.character(row_results$selected_model), 
+         'no-association' = "no assocation", 
+         'current-use' = "current use", 
+         'past-use' = "past use",
+         'withdrawal' = "withdrawal",
+         'delayed' = "delayed",
+         'decaying' = "decaying",
+         'delayed+decaying' = "delayed + decaying",
+         'long-term' = "long term")  
+}
 
-r <- truth 
-r <- r %>% group_by(n_patients,
-               simulation_time ,  
-               min_chance_drug, 
-               avg_duration, 
-               prob_guaranteed_exposed, 
-               min_chance, 
-               max_chance)
+truth$truth_label <- sapply(1:nrow(truth), function(i) return_true_risk_model_label(truth[i,]))
+truth$selected_label <- sapply(1:nrow(truth), function(i) return_selected_risk_model_label(truth[i,]))
+
+# Go over all simulation parameter settings and determine the performance ------
+# only_sim_param contains all these parameters
+
+# go over all settings
+r <- lapply(1:nrow(only_sim_param), function(i) { 
+  temp <- truth %>% filter(n_patients == only_sim_param$n_patients[i],
+                           simulation_time == only_sim_param$simulation_time[i], 
+                           min_chance_drug == only_sim_param$min_chance_drug[i], 
+                           avg_duration == only_sim_param$avg_duration[i], 
+                           prob_guaranteed_exposed == only_sim_param$prob_guaranteed_exposed[i],
+                           min_chance == only_sim_param$min_chance[i],
+                           max_chance == only_sim_param$max_chance[i])  
+  
+  confusion_matrix <- matrix(rep(0, 8*12), nrow = 8) 
+  rownames(confusion_matrix) <- c("no assocation", "current use", "past use","withdrawal","delayed","decaying","delayed + decaying","long term")
+  colnames(confusion_matrix) <- c("")
+  
+  for (j in 1:nrow(temp)) { 
+    confusion_matrix[temp$truth_label[j], temp$selected_label[j]] <- confusion_matrix[temp$truth_label[j], temp$selected_label[j]] + 1
+    confusion_matrix[temp$selected_label[j], temp$truth_label[j]] <- confusion_matrix[temp$truth_label[j], temp$selected_label[j]]
+  }
+  
+  #m <- matrix(rep(0, 3*4), nrow = 3)
+  #rownames(m) <- letters[1:3]
+  #colnames(m) <- letters[1:4]
+  #m['b', 'c'] <- 1
+  
+  #true_model <- temp$risk_model
+  #selected_model <- as.factor(temp$selected_model)
+  
+  # attributes(selected_model) <- attributes(true_model) 
+  
+  confusion_matrix 
+  # get the results for detecting a signal or not
+  # hmeasure::HMeasure(temp$effect, temp$signal)
+})
 
 groups <- group_map(r, function(group, ...) group)
 

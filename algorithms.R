@@ -100,29 +100,5 @@ expard_wrapper <- function(data, job, instance, ...) {
   res$job.id <- job$job.id
   
   return(res)
-  
-  # TODO: Change with type of weight matrix
-  #if (job$algo.pars$type_weight_matrix == "grid") { 
-  lambda1 = 1:2
-  lambda2 = 1:2
-  #}
-  
-  # Apply the CVN algorithm 
-  fit <- CVN::CVN(instance$data, W, lambda1 = lambda1, 
-                  lambda2 = lambda2, eps = 10e-4, maxiter = 1000, verbose = TRUE)
-  
-  # add the truth 
-  fit$truth <- instance$truth
-  
-  # save results 
-  filename <- paste("results/", paste(c("cvnsim", job$prob.pars, job$algo.pars, job$seed, job$repl), collapse = '_'), sep = '')
-  
-  # store the fit and the truth in a file 
-  readr::write_rds(fit, filename, compress = "gz")
-  
-  performance <- get_performance(fit)
-  performance$repl <- job$repl
-  performance$job.id <- job$job.id
-  return(performance)
 }
 
