@@ -160,6 +160,68 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
 })
 
 plot_confusion_matrix(r[[1]], title = "hello")
+
+plots <- lapply(1:nrow(only_sim_param), function(i) { 
+  n_patients <- only_sim_param$n_patients[i]
+  simulation_time <- only_sim_param$simulation_time[i] 
+  min_chance_drug <- only_sim_param$min_chance_drug[i] 
+  avg_duration <- only_sim_param$avg_duration[i] 
+  prob_guaranteed_exposed <- only_sim_param$prob_guaranteed_exposed[i]
+  min_chance <- only_sim_param$min_chance[i]
+  max_chance <- only_sim_param$max_chance[i]
+  
+  if (prob_guaranteed_exposed == 1) {
+    title <- sprintf("No. patients = %d (all prescribed), Min./Max. Risk = %g/%g", n_patients, 
+                     min_chance, max_chance)
+  } else {
+    title <- sprintf("No. patients = %d, At least %d patients prescribed, Min./Max. Risk = %g/%g", n_patients, 
+                   n_patients * prob_guaranteed_exposed, min_chance, max_chance)
+  }
+  
+  filename <-
+    sprintf(
+      "figures/confusion_matrix_%d_%d_%g_%g_%g_%g_%g.pdf",
+      n_patients                     ,
+      simulation_time,
+      min_chance_drug          ,
+      avg_duration             ,
+      prob_guaranteed_exposed,
+      min_chance,
+      max_chance
+    )
+  
+  p <- plot_confusion_matrix(confusion_matrices[[i]], title = title)
+  
+  ggsave(filename, plot = p, width = 10, height = 6)
+  return(p)
+})
+
+# ------------------------------------------------------------------------------
+# plot perfect score confusion matrix plot
+perfect <- confusion_matrices[[1]]
+perfect[] <- 0
+
+perfect[1,1] <- 1
+perfect[2,2] <- 1
+perfect[3,3] <- 1
+perfect[3,4] <- 1
+perfect[4,5] <- 1
+
+perfect[4,6] <- 1
+perfect[5,7] <- 1
+perfect[5,8] <- 1
+perfect[6,9] <- 1
+perfect[6,10] <- 1
+
+perfect[7,11] <- 1
+perfect[8,12] <- 1
+
+perfect <- perfect * 100 
+
+p <- plot_confusion_matrix(perfect, title = "Confusion matrix with a perfect score")
+
+ggsave("figures/confusion-matrix_perfect.pdf", plot = p, width = 10, height = 6)
+
 #' 
 #' 
 #' groups <- group_map(r, function(group, ...)
