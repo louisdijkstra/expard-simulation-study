@@ -6,6 +6,11 @@ plot_parameter_estimate_past <- function(estimate,
                                          ylabel = "log-likelihood") { 
   ggplot(data = estimate %>% filter(model == "past-use")) + 
     geom_vline(xintercept = true_value, color="red", size=1, alpha=.7, linetype="dotted") +
+    annotate("text", 
+             x = true_value,#true_value, 
+             y = (max(estimate$loglikelihood) - min(estimate$loglikelihood)) * .8 + min(estimate$loglikelihood), # at certain percentage 
+             label="Some text", 
+             angle=90) + 
     geom_point(aes(x = past, y = loglikelihood)) + 
     ggtitle(title) + 
     xlab(xlabel) + 
