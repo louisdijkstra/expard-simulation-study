@@ -3,8 +3,8 @@ library(dplyr)
 library(hmeasure)
 library(caret)
 
-
 source("parameter-settings.R")
+source("confusion-matrix-functions.R")
 
 # Function that take in the raw results stored 
 data <- readr::read_rds("results/raw-results.rds")
@@ -60,11 +60,11 @@ return_true_risk_model_label <- function(row_results) {
          'withdrawal' = sprintf("withdrawal (rate = %g)", row_results$rate),
          'delayed' = sprintf("delayed (delay = %d, std = %d)", row_results$mu, row_results$sigma),
          'decaying' = sprintf("decaying (rate = %g)", row_results$rate),
-         'delayed+decaying' = sprintf("delayed + decaying (delay = %d, std = %d, rate = %g)", 
-                                      row_results$mu, 
-                                      row_results$sigma, 
-                                      row_results$rate),
-         'long-term' = sprintf("long term (rate = %g, delay = %d)", row_results$rate, row_results$delay))  
+         'delayed+decaying' = "delayed + decaying", #sprintf("delayed + decaying (delay = %d, std = %d, rate = %g)", 
+                              #        row_results$mu, 
+                              #        row_results$sigma, 
+                              #        row_results$rate),
+         'long-term' = "long term")#sprintf("long term (rate = %g, delay = %d)", row_results$rate, row_results$delay))  
 }
 
 return_selected_risk_model_label <- function(row_results) { 
@@ -85,8 +85,42 @@ truth$selected_label <- sapply(1:nrow(truth), function(i) return_selected_risk_m
 # Go over all simulation parameter settings and determine the performance ------
 # only_sim_param contains all these parameters
 
+revert_to_index <- function(label, truth = TRUE) { 
+  if (truth) {
+    index <- switch(
+      label,
+      "no assocation" = 1,
+      "current use" = 2     ,
+      "past use (delay = 5)" = 3,
+      "past use (delay = 10)" = 4,
+      "withdrawal (rate = 0.5)" = 5,
+      "withdrawal (rate = 1)" = 6     ,
+      "delayed (delay = 2, std = 2)" = 7,
+      "delayed (delay = 5, std = 2)" = 8  ,
+      "decaying (rate = 0.5)" = 9          ,
+      "decaying (rate = 1)" = 10             ,
+      "delayed + decaying" = 11,# (delay = 10, std = 2, rate = 0.5)" = 11,
+      "long term" = 12 # (rate = 0.25, delay = 50)" = 12
+    ) 
+  } else {
+    index <- switch(
+      label,
+      "no assocation" = 1,
+      "current use" = 2,
+      "past use" = 3,
+      "withdrawal" = 4,
+      "delayed" = 5,
+      "decaying" = 6,
+      "delayed + decaying" = 7,
+      "long term" = 8
+    )
+  }
+  
+  return(index)
+}
+
 # go over all settings
-r <- lapply(1:nrow(only_sim_param), function(i) { 
+confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) { 
   temp <- truth %>% filter(n_patients == only_sim_param$n_patients[i],
                            simulation_time == only_sim_param$simulation_time[i], 
                            min_chance_drug == only_sim_param$min_chance_drug[i], 
@@ -95,93 +129,100 @@ r <- lapply(1:nrow(only_sim_param), function(i) {
                            min_chance == only_sim_param$min_chance[i],
                            max_chance == only_sim_param$max_chance[i])  
   
+  n_replications <- nrow(temp) / 12
+  
   confusion_matrix <- matrix(rep(0, 8*12), nrow = 8) 
   rownames(confusion_matrix) <- c("no assocation", "current use", "past use","withdrawal","delayed","decaying","delayed + decaying","long term")
-  colnames(confusion_matrix) <- c("")
+  colnames(confusion_matrix) <- c(
+    "no assocation",
+    "current use"     ,
+    "past use (delay = 5)",
+    "past use (delay = 10)" ,
+    "withdrawal (rate = 0.5)" ,
+    "withdrawal (rate = 1)"     ,
+    "delayed (delay = 2, std = 2)",
+    "delayed (delay = 5, std = 2)"  ,
+    "decaying (rate = 0.5)"          ,
+    "decaying (rate = 1)"             ,
+    "delayed + decaying", # (delay = 10, std = 2, rate = 0.5)",
+    "long term" # (rate = 0.25, delay = 50)"
+  )
   
   for (j in 1:nrow(temp)) { 
-    confusion_matrix[temp$truth_label[j], temp$selected_label[j]] <- confusion_matrix[temp$truth_label[j], temp$selected_label[j]] + 1
-    confusion_matrix[temp$selected_label[j], temp$truth_label[j]] <- confusion_matrix[temp$truth_label[j], temp$selected_label[j]]
+    index_truth <- revert_to_index(temp$truth_label[j], TRUE)
+    print(index_truth)
+    index_selected <- revert_to_index(temp$selected_label[j], FALSE)
+    print(index_selected)
+    confusion_matrix[index_selected, index_truth] <- confusion_matrix[index_selected, index_truth] + 1
+    #confusion_matrix[index_selected, index_truth] <- confusion_matrix[index_truth, index_selected]
   }
-  
-  #m <- matrix(rep(0, 3*4), nrow = 3)
-  #rownames(m) <- letters[1:3]
-  #colnames(m) <- letters[1:4]
-  #m['b', 'c'] <- 1
-  
-  #true_model <- temp$risk_model
-  #selected_model <- as.factor(temp$selected_model)
-  
-  # attributes(selected_model) <- attributes(true_model) 
-  
-  confusion_matrix 
-  # get the results for detecting a signal or not
-  # hmeasure::HMeasure(temp$effect, temp$signal)
+  confusion_matrix / n_replications * 100
 })
 
-groups <- group_map(r, function(group, ...) group)
-
-
-
-expand.grid(
-  n_patients,
-  simulation_time ,  
-  min_chance_drug, 
-  avg_duration, 
-  prob_guaranteed_exposed, 
-  min_chance, 
-  max_chance
-)
-
-
-
-#' COLLECT THE RESULTS --------------------------------------------------------- 
-
-
-
-pars <- data$truth 
-res <- data$estimates
-
-# combine into one big data frame
-res <- do.call(rbind.data.frame, res)
-
-tab <- dplyr::left_join(res, pars)#, by = "job.id")
-
-results <- list(
-  truth = pars, 
-  estimates = reduceResultsList() 
-)
-
-
-#' There are different 
-#'  * parameter settings for the simulation
-#'  * different versions of the weight matrix
-#'  * different lambda values
-
-# go over each experiment and select the lambda1, lambda2 value that 
-# has either the best AIC, BIC, F1 score... whatever you want to do. 
-# Do not forget to set 'maximum'!
-get_best_score_per_experiment <- function(data, var = c("aic", "bic", "F1"), maximum = FALSE) { 
-  if (maximum) { 
-    return(
-      data %>% group_by(job.id, repl) %>% slice(which.max(get(var[1]))) %>% ungroup()
-    )
-  } else {
-    return(
-      data %>% group_by(job.id, repl) %>% slice(which.min(get(var[1]))) %>% ungroup()
-    )
-  }
-}
-
-
-aic <- get_best_score_per_experiment(data, "aic", maximum = FALSE)
-bic <- get_best_score_per_experiment(data, "bic", maximum = FALSE)
-oracle <- get_best_score_per_experiment(data, "F1", maximum = TRUE)
-
-aic$score <- "AIC"
-bic$score <- "BIC"
-oracle$score <- "Oracle"
-
-best_scores <- do.call("rbind", list(aic, bic, oracle))
-
-readr::write_rds(best_scores, "results/best-scores.rds", compress = "gz")
+plot_confusion_matrix(r[[1]], title = "hello")
+#' 
+#' 
+#' groups <- group_map(r, function(group, ...)
+#'   group)
+#' 
+#' 
+#' 
+#' expand.grid(
+#'   n_patients,
+#'   simulation_time ,
+#'   min_chance_drug,
+#'   avg_duration,
+#'   prob_guaranteed_exposed,
+#'   min_chance,
+#'   max_chance
+#' )
+#' 
+#' 
+#' 
+#' #' COLLECT THE RESULTS ---------------------------------------------------------
+#' 
+#' 
+#' 
+#' pars <- data$truth
+#' res <- data$estimates
+#' 
+#' # combine into one big data frame
+#' res <- do.call(rbind.data.frame, res)
+#' 
+#' tab <- dplyr::left_join(res, pars)#, by = "job.id")
+#' 
+#' results <- list(truth = pars,
+#'                 estimates = reduceResultsList())
+#' 
+#' 
+#' #' There are different
+#' #'  * parameter settings for the simulation
+#' #'  * different versions of the weight matrix
+#' #'  * different lambda values
+#' 
+#' # go over each experiment and select the lambda1, lambda2 value that
+#' # has either the best AIC, BIC, F1 score... whatever you want to do.
+#' # Do not forget to set 'maximum'!
+#' get_best_score_per_experiment <-
+#'   function(data,
+#'            var = c("aic", "bic", "F1"),
+#'            maximum = FALSE) {
+#'     if (maximum) {
+#'       return(data %>% group_by(job.id, repl) %>% slice(which.max(get(var[1]))) %>% ungroup())
+#'     } else {
+#'       return(data %>% group_by(job.id, repl) %>% slice(which.min(get(var[1]))) %>% ungroup())
+#'     }
+#'   }
+#' 
+#' 
+#' aic <- get_best_score_per_experiment(data, "aic", maximum = FALSE)
+#' bic <- get_best_score_per_experiment(data, "bic", maximum = FALSE)
+#' oracle <- get_best_score_per_experiment(data, "F1", maximum = TRUE)
+#' 
+#' aic$score <- "AIC"
+#' bic$score <- "BIC"
+#' oracle$score <- "Oracle"
+#' 
+#' best_scores <- do.call("rbind", list(aic, bic, oracle))
+#' 
+#' readr::write_rds(best_scores, "results/best-scores.rds", compress = "gz")
