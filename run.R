@@ -41,7 +41,7 @@ packages = c("expard", "tidyverse", "hmeasure", "batchtools", "reshape2", "ggplo
 source = c("problems.R", "algorithms.R", "parameter-settings.R")
 
 #' Number of concurrent jobs that run on the cluster (if the cluster is used)
-max.concurrent.jobs <- 100
+max.concurrent.jobs <- 200
 
 
 #' THE EXPERIMENT ITSELF -------------------------------------------------------
