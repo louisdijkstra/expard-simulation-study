@@ -1,7 +1,8 @@
 library(batchtools)
 library(CVN) 
 library(CVNSim)
-library(tidyverse)
+library(dplyr)
+library(readr)
 library(hmeasure)
 library(expard)
 
@@ -37,7 +38,7 @@ start_from_scratch <- TRUE
 reg_name <- "analysis"
 
 #' Packages and files to load
-packages = c("expard", "tidyverse", "hmeasure", "batchtools", "reshape2", "ggplot2")
+packages = c("expard", "dplyr", "readr", "hmeasure", "batchtools", "reshape2", "ggplot2")
 source = c("problems.R", "algorithms.R", "parameter-settings.R")
 
 #' Number of concurrent jobs that run on the cluster (if the cluster is used)
