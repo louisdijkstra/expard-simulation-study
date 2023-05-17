@@ -123,7 +123,11 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   #' easier to process the results later on when there are repetitions
   sim_param$sim_param_id <- 1:nrow(sim_param)
   
-} else { # Not a test run ------------------------------------------------------
+} else { 
+  
+################################################################################
+# PARAMETER SETTINGS FULL STUDY
+################################################################################
   
   only_sim_param <- dplyr::as_tibble(
     expand.grid(
