@@ -43,7 +43,7 @@ signal_yes_or_no <- function(e) {
 }
 
 # store whether there is an effect or not (true model)
-truth$effect <- sapply(truth$risk_model, function(m) return(m == "no-association"))
+truth$effect <- sapply(truth$risk_model, function(m) return(m != "no-association"))
 
 # store the selected model based on posterior distribution 
 truth$selected_model <- sapply(est, function(e) select_best_model_given_posterior(e))
@@ -222,6 +222,36 @@ p <- plot_confusion_matrix(perfect, title = "Confusion matrix with a perfect sco
 
 ggsave("figures/confusion-matrix_perfect.pdf", plot = p, width = 10, height = 6)
 
+
+
+
+
+
+
+# ------------------------------------------------------------------------------
+# Get performance measures binary
+# ------------------------------------------------------------------------------
+
+performances_per_simulation_setting = lapply(1:nrow(only_sim_param), function(i) { 
+  temp <- truth %>% filter(n_patients == only_sim_param$n_patients[i],
+                           simulation_time == only_sim_param$simulation_time[i], 
+                           min_chance_drug == only_sim_param$min_chance_drug[i], 
+                           avg_duration == only_sim_param$avg_duration[i], 
+                           prob_guaranteed_exposed == only_sim_param$prob_guaranteed_exposed[i],
+                           min_chance == only_sim_param$min_chance[i],
+                           max_chance == only_sim_param$max_chance[i])  
+  temp_results <- hmeasure::HMeasure(temp$effect, temp$signal)
+  temp_results$metrics
+})
+
+performance <- bind_rows(performances_per_simulation_setting)
+rownames(performance) <- NULL
+
+# combine performance metrics with the simulation parameter settings
+performance <- cbind(only_sim_param, performance)
+
+readr::write_rds(performance, "results/overall-performance.rds")
+#' 
 #' 
 #' 
 #' groups <- group_map(r, function(group, ...)
