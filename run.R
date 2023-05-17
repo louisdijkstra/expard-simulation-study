@@ -22,7 +22,7 @@ test_run <- TRUE
 
 # Total number of replications for each parameter setting
 if (test_run) { 
-  repls <- 2
+  repls <- 1
 } else { 
   repls <- 100
 }
@@ -34,10 +34,10 @@ if (test_run) {
 start_from_scratch <- TRUE 
 
 #' Name of the repository
-reg_name <- "expardsim"
+reg_name <- "analysis"
 
 #' Packages and files to load
-packages = c("expard", "tidyverse", "hmeasure", "batchtools")
+packages = c("expard", "tidyverse", "hmeasure", "batchtools", "reshape2", "ggplot2")
 source = c("problems.R", "algorithms.R", "parameter-settings.R")
 
 #' Number of concurrent jobs that run on the cluster (if the cluster is used)
@@ -92,15 +92,6 @@ waitForJobs()
 
 
 #' COLLECT THE RESULTS --------------------------------------------------------- 
-#res <- reduceResultsList() 
-
-# combine into one big data frame
-#res <- do.call(rbind.data.frame, res)
-
-# combine the results with the parameters for the job
-#pars <- unwrap(getJobPars())
-
-#tab <- dplyr::left_join(res, pars)#, by = "job.id")
 
 results <- list(
   truth = unwrap(getJobPars()), 
@@ -111,7 +102,4 @@ results <- list(
 readr::write_rds(results, "results/raw-results.rds", compress = "gz")
 
 # post-process the results
-#source("process-results.R")
-
-# TODO create the plots
-#source("plots.R") 
+source("process-results.R")

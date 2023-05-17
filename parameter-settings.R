@@ -40,6 +40,9 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_param <- merge(risk_models, only_sim_param)
   
+  #' Parameters of the different risk models -----------------------------------
+  
+  #' no association ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "no-assocation"
@@ -47,15 +50,15 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  sim_method
   
+  #' current use ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "current-use"
     ))
   
-  
-  
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' past use ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "past-use", 
@@ -64,6 +67,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' withdrawal ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "withdrawal", 
@@ -72,6 +76,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' delayed ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "delayed", 
@@ -81,6 +86,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' decaying ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "decaying", 
@@ -89,6 +95,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' delayed + decaying ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "delayed+decaying", 
@@ -99,6 +106,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' long term ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "long-term", 
@@ -106,15 +114,16 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
       delay = c(50)
     ))
   
-  sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
+  sim_method_all <- dplyr::full_join(sim_method_all, sim_method)
   
-  sim_param <- dplyr::left_join(sim_param, sim_method_all)
+  #' Combine all parameters for the simulations and the methods
+  sim_param <- suppressWarnings(dplyr::left_join(sim_param, sim_method_all))
   
   #' provide a specific id to each parameter setting. This makes it 
   #' easier to process the results later on when there are repetitions
   sim_param$sim_param_id <- 1:nrow(sim_param)
   
-} else { # Not a test run 
+} else { # Not a test run ------------------------------------------------------
   
   only_sim_param <- dplyr::as_tibble(
     expand.grid(
@@ -143,6 +152,9 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_param <- merge(risk_models, only_sim_param)
   
+  #' Parameters of the different risk models -----------------------------------
+  
+  #' no association ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "no-assocation"
@@ -150,15 +162,15 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  sim_method
   
+  #' current use ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "current-use"
     ))
   
-  
-  
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' past use ---------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "past-use", 
@@ -167,6 +179,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' withdrawal --------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "withdrawal", 
@@ -175,6 +188,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' delayed --------------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "delayed", 
@@ -184,6 +198,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' decaying -----------------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "decaying", 
@@ -192,6 +207,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' delayed + decaying --------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "delayed+decaying", 
@@ -202,6 +218,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
   
+  #' long term -----------------------
   sim_method <- dplyr::as_tibble(
     expand.grid(
       risk_model = "long-term", 
@@ -209,12 +226,12 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
       delay = c(50)
     ))
   
-  sim_method_all <-  dplyr::full_join(sim_method_all, sim_method)
+  sim_method_all <- dplyr::full_join(sim_method_all, sim_method)
   
-  sim_param <- dplyr::left_join(sim_param, sim_method_all)
+  #' Combine all parameters for the simulations and the methods
+  sim_param <- suppressWarnings(dplyr::left_join(sim_param, sim_method_all))
   
   #' provide a specific id to each parameter setting. This makes it 
   #' easier to process the results later on when there are repetitions
   sim_param$sim_param_id <- 1:nrow(sim_param)
-  
 }

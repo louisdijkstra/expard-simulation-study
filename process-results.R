@@ -2,16 +2,18 @@ library(readr)
 library(dplyr)
 library(hmeasure)
 library(caret)
+library(reshape2)
+library(ggplot2)
+
+# LOAD THE DATA ----------------------------------------------------------------
 
 source("parameter-settings.R")
-source("confusion-matrix-functions.R")
-
-# Function that take in the raw results stored 
+source("plot.R")
 data <- readr::read_rds("results/raw-results.rds")
 
 # get the truth and the estimated models
 truth <- data$truth
-est <- data$estimates
+est   <- data$estimates
 
 #' Determine different performance measures. The variable 'truth' is updated 
 #' with the results
@@ -51,7 +53,9 @@ truth$selected_model <- sapply(est, function(e) select_best_model_given_posterio
 # determine whether there is a signal or not based on posterior distribution
 truth$signal <- sapply(est, function(e) signal_yes_or_no(e))
 
-# add a good label for every risk model ----------------------------------------
+# ADD LABELS -------------------------------------------------------------------
+
+# add a good label for every true risk model 
 return_true_risk_model_label <- function(row_results) { 
   switch(as.character(row_results$risk_model), 
          'no-association' = "no assocation", 
@@ -60,13 +64,11 @@ return_true_risk_model_label <- function(row_results) {
          'withdrawal' = sprintf("withdrawal (rate = %g)", row_results$rate),
          'delayed' = sprintf("delayed (delay = %d, std = %d)", row_results$mu, row_results$sigma),
          'decaying' = sprintf("decaying (rate = %g)", row_results$rate),
-         'delayed+decaying' = "delayed + decaying", #sprintf("delayed + decaying (delay = %d, std = %d, rate = %g)", 
-                              #        row_results$mu, 
-                              #        row_results$sigma, 
-                              #        row_results$rate),
-         'long-term' = "long term")#sprintf("long term (rate = %g, delay = %d)", row_results$rate, row_results$delay))  
+         'delayed+decaying' = "delayed + decaying", 
+         'long-term' = "long term") 
 }
 
+# add a good label for every selected risk model 
 return_selected_risk_model_label <- function(row_results) { 
   switch(as.character(row_results$selected_model), 
          'no-association' = "no assocation", 
@@ -79,12 +81,15 @@ return_selected_risk_model_label <- function(row_results) {
          'long-term' = "long term")  
 }
 
+# Add the labels to the truth
 truth$truth_label <- sapply(1:nrow(truth), function(i) return_true_risk_model_label(truth[i,]))
 truth$selected_label <- sapply(1:nrow(truth), function(i) return_selected_risk_model_label(truth[i,]))
 
-# Go over all simulation parameter settings and determine the performance ------
-# only_sim_param contains all these parameters
+# DETERMINE THE CONFUSION MATRICES ---------------------------------------------
 
+#' Returns an index for the confusion matrix given the label. If truth = TRUE
+#' the index for the label for the true models is returned, selected models 
+#' otherwise
 revert_to_index <- function(label, truth = TRUE) { 
   if (truth) {
     index <- switch(
@@ -99,8 +104,8 @@ revert_to_index <- function(label, truth = TRUE) {
       "delayed (delay = 5, std = 2)" = 8  ,
       "decaying (rate = 0.5)" = 9          ,
       "decaying (rate = 1)" = 10             ,
-      "delayed + decaying" = 11,# (delay = 10, std = 2, rate = 0.5)" = 11,
-      "long term" = 12 # (rate = 0.25, delay = 50)" = 12
+      "delayed + decaying" = 11,
+      "long term" = 12
     ) 
   } else {
     index <- switch(
@@ -121,6 +126,7 @@ revert_to_index <- function(label, truth = TRUE) {
 
 # go over all settings
 confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) { 
+  # filter for the relevant results
   temp <- truth %>% filter(n_patients == only_sim_param$n_patients[i],
                            simulation_time == only_sim_param$simulation_time[i], 
                            min_chance_drug == only_sim_param$min_chance_drug[i], 
@@ -131,6 +137,7 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
   
   n_replications <- nrow(temp) / 12
   
+  # Initial the confusion matrix
   confusion_matrix <- matrix(rep(0, 8*12), nrow = 8) 
   rownames(confusion_matrix) <- c("no assocation", "current use", "past use","withdrawal","delayed","decaying","delayed + decaying","long term")
   colnames(confusion_matrix) <- c(
@@ -144,22 +151,19 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
     "delayed (delay = 5, std = 2)"  ,
     "decaying (rate = 0.5)"          ,
     "decaying (rate = 1)"             ,
-    "delayed + decaying", # (delay = 10, std = 2, rate = 0.5)",
-    "long term" # (rate = 0.25, delay = 50)"
+    "delayed + decaying", 
+    "long term" 
   )
   
   for (j in 1:nrow(temp)) { 
     index_truth <- revert_to_index(temp$truth_label[j], TRUE)
-    print(index_truth)
     index_selected <- revert_to_index(temp$selected_label[j], FALSE)
-    print(index_selected)
     confusion_matrix[index_selected, index_truth] <- confusion_matrix[index_selected, index_truth] + 1
-    #confusion_matrix[index_selected, index_truth] <- confusion_matrix[index_truth, index_selected]
   }
   confusion_matrix / n_replications * 100
 })
 
-plot_confusion_matrix(r[[1]], title = "hello")
+plot_confusion_matrix(conf_matrix = confusion_matrices[[1]], title = "title")
 
 plots <- lapply(1:nrow(only_sim_param), function(i) { 
   n_patients <- only_sim_param$n_patients[i]
@@ -224,10 +228,6 @@ ggsave("figures/confusion-matrix_perfect.pdf", plot = p, width = 10, height = 6)
 
 
 
-
-
-
-
 # ------------------------------------------------------------------------------
 # Get performance measures binary
 # ------------------------------------------------------------------------------
@@ -251,70 +251,3 @@ rownames(performance) <- NULL
 performance <- cbind(only_sim_param, performance)
 
 readr::write_rds(performance, "results/overall-performance.rds")
-#' 
-#' 
-#' 
-#' groups <- group_map(r, function(group, ...)
-#'   group)
-#' 
-#' 
-#' 
-#' expand.grid(
-#'   n_patients,
-#'   simulation_time ,
-#'   min_chance_drug,
-#'   avg_duration,
-#'   prob_guaranteed_exposed,
-#'   min_chance,
-#'   max_chance
-#' )
-#' 
-#' 
-#' 
-#' #' COLLECT THE RESULTS ---------------------------------------------------------
-#' 
-#' 
-#' 
-#' pars <- data$truth
-#' res <- data$estimates
-#' 
-#' # combine into one big data frame
-#' res <- do.call(rbind.data.frame, res)
-#' 
-#' tab <- dplyr::left_join(res, pars)#, by = "job.id")
-#' 
-#' results <- list(truth = pars,
-#'                 estimates = reduceResultsList())
-#' 
-#' 
-#' #' There are different
-#' #'  * parameter settings for the simulation
-#' #'  * different versions of the weight matrix
-#' #'  * different lambda values
-#' 
-#' # go over each experiment and select the lambda1, lambda2 value that
-#' # has either the best AIC, BIC, F1 score... whatever you want to do.
-#' # Do not forget to set 'maximum'!
-#' get_best_score_per_experiment <-
-#'   function(data,
-#'            var = c("aic", "bic", "F1"),
-#'            maximum = FALSE) {
-#'     if (maximum) {
-#'       return(data %>% group_by(job.id, repl) %>% slice(which.max(get(var[1]))) %>% ungroup())
-#'     } else {
-#'       return(data %>% group_by(job.id, repl) %>% slice(which.min(get(var[1]))) %>% ungroup())
-#'     }
-#'   }
-#' 
-#' 
-#' aic <- get_best_score_per_experiment(data, "aic", maximum = FALSE)
-#' bic <- get_best_score_per_experiment(data, "bic", maximum = FALSE)
-#' oracle <- get_best_score_per_experiment(data, "F1", maximum = TRUE)
-#' 
-#' aic$score <- "AIC"
-#' bic$score <- "BIC"
-#' oracle$score <- "Oracle"
-#' 
-#' best_scores <- do.call("rbind", list(aic, bic, oracle))
-#' 
-#' readr::write_rds(best_scores, "results/best-scores.rds", compress = "gz")

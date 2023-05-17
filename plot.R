@@ -1,84 +1,102 @@
-# create all figures  
+#' All function for plotting
 
-library(readr)
-library(dplyr)
-library(ggplot2)
-
-# load data
-data <- readr::read_rds("results/best-scores.rds")
-
-source("parameter-settings.R")
-
-sim_param
-algo_param
-settings <- merge(sim_param, algo_param)
-
-get_subset <- function(data, row_settings) { 
-  data %>% filter(
-    sim_param_id == row_settings$sim_param_id, 
-    type_weight_matrix == row_settings$type_weight_matrix
-  )
-}
-
-b = get_subset(data, settings[1,])
-
-create_boxplot <- function(data, row_settings, var = c("F1", "F2"), 
-                           xlabel = "Selection method", title = NULL) { 
+#' @export
+plot_confusion_matrix <- function(conf_matrix, 
+                                  title = "",
+                                  xlabel = "true model",
+                                  ylabel = "selected model") { 
   
-  b <- get_subset(data, row_settings)
+  melted_conf_matrix <- reshape2::melt(t(conf_matrix))
   
-  if (is.null(title)) { 
-    if (row_settings$type == "scale-free") { 
-      graph_desc <- sprintf("(Scale-free, power coeff. %g)", row_settings$power)
-    } else { 
-      graph_desc <- sprintf("(Erdos-Rényi, prob. %g)", row_settings$probability)
-    }
-    title <- sprintf("p = %d, n = %d, weight matrix: %s %s", 
-                     row_settings$p, 
-                     row_settings$n, 
-                     row_settings$type_weight_matrix, 
-                     graph_desc)
-    
-    title <- sprintf("p = %d, n = %d, weight matrix: %s %s", 
-                     row_settings$p, row_settings$n_obs, 
-                     row_settings$type_weight_matrix, 
-                     graph_desc) 
-                  
-  }
+  true_model_labels <- colnames(conf_matrix)
+  model_labels <- rownames(conf_matrix)
   
-  ggplot(b, aes(x = score, y = get(var[1]), color = score)) + 
-    geom_boxplot() + 
-    xlab(xlabel) + 
+  p <- ggplot(data = melted_conf_matrix, aes(x = Var1, y = Var2, fill = value)) +
+    geom_tile() +
+    geom_vline(xintercept = seq(0.5, 12, by = 1), color="gray", size=.25, alpha=.6) +  # set vertical lines between x groups
+    geom_hline(yintercept = seq(0.5, 8, by = 1), color="gray", size=.25, alpha=.6) +  
+    #theme_minimal() +
+    xlab(xlabel) +
+    ylab(ylabel) +
     ggtitle(title) + 
-    ylab(var) + 
-    scale_color_brewer(palette="Dark2") + 
-    theme_classic()
+    scale_x_discrete(expand=c(0,0), labels = true_model_labels) +
+    scale_y_discrete(expand=c(0,0), labels = model_labels) +
+    scale_fill_gradient(low = "white", high = "red", name = "percentage") +
+    theme(panel.grid = element_line(color = "#8ccde3",
+                                    size = 0.75,
+                                    linetype = 2), 
+          panel.border = element_rect(colour = "black", fill=NA, size=.5),
+          panel.grid.minor = element_line(colour = "black", size = 5, linetype = 1) , 
+          axis.text.y = element_text(angle=45),
+          axis.text.x = element_text(angle=45, hjust=1,vjust=1)) +
+    coord_fixed() 
+  
+  return(p) 
 }
 
-for (i in 1:nrow(settings)) { 
-  row_settings <- settings[i, ]
-  
-  p <- create_boxplot(data, row_settings, var = "F1")  
 
-  filename <- paste0(lapply(as.list(row_settings), function(x) as.character(x)), collapse = "_")
+
+
+#' Plots for showing the results for the estimates
+#' Example: plot_parameter_estimate_past(est[[5]], true_value = truth[5, past])
+plot_parameter_estimate_past <- function(estimate, 
+                                         true_value = 10, 
+                                         title = "Example of Log-likelihood 'Paste Use' Risk Model",
+                                         xlabel = "parameter of the 'past use' risk model", 
+                                         ylabel = "log-likelihood") { 
+  ggplot(data = estimate %>% filter(model == "past-use")) + 
+    geom_vline(xintercept = true_value, color="red", size=1, alpha=.7, linetype="dotted") +
+    annotate("text", 
+             x = true_value - .3,#true_value, 
+             y = (max(estimate$loglikelihood) - min(estimate$loglikelihood))*.5 + min(estimate$loglikelihood), # at certain percentage 
+             label="true value",
+             color = "red", 
+             angle=90) + 
+    geom_point(aes(x = past, y = loglikelihood)) + 
+    ggtitle(title) + 
+    xlab(xlabel) + 
+    ylab(ylabel) + 
+    theme_bw()
+}
+
+
+
+#' plot true risk model and estimated risk model 
+#' Example: 
+#' plot_estimated_true_risk_models(estimated_risk_model = risk_model_delayed(80, 30))
+plot_estimated_true_risk_models <- function(drug_history = c(rep(0, 4), rep(1, 6), rep(0, 90)),
+                                            true_risk_model = risk_model_long_term(0.25, 50),
+                                            estimated_risk_model = risk_model_current_use(),
+                                            title = "", 
+                                            ylim = c(0,1), 
+                                            shaded_area = TRUE, 
+                                            fill = "black", 
+                                            alpha = 0.3) {
   
-  filename <- paste0("figures/", filename, collapse = "")
+  p <- expard::plot_risk(drug_history = drug_history, 
+                         risk_model = true_risk_model,
+                         title = title, 
+                         ylim = ylim, 
+                         shaded_area = shaded_area,
+                         fill = fill, 
+                         alpha = alpha)
   
-  filename <- paste0(filename, ".pdf", collapse = "")
+  # determine the risks given the drug prescription history 
+  # and the risk model given by risk_model
+  risks <- estimated_risk_model(drug_history)
   
-  ggplot2::ggsave(
-    filename,
-    p,
-    device = NULL,
-    path = NULL,
-    scale = 1,
-    width = 7,
-    height = 4,
-    units = c("in", "cm", "mm", "px"),
-    dpi = 300,
-    limitsize = TRUE,
-    bg = NULL
+  # create a dataset with the time points, the drug prescriptions 
+  # and the risks
+  data <- data.frame(
+    t = 1:length(drug_history), 
+    drug = drug_history,
+    risk = risks
   )
+  
+  p <- p + geom_point(data = data, mapping = aes(x = t, y = risks), colour = "black", shape=1)
+  
+  return(p)
 }
-create_boxplot(data, settings[3,])
+
+
 

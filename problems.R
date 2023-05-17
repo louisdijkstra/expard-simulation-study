@@ -12,7 +12,6 @@ simulator_wrapper <-
            sim_param_id 
            ) {
     
-    cat(sprintf("The past is %d\n", past))
     # first determine the risk model 
     risk_model_fn <- switch(as.character(risk_model), 
                             "no-association" = "risk_model_no_association()", 
@@ -24,6 +23,7 @@ simulator_wrapper <-
                             "delayed+decaying" = sprintf("risk_model_delayed_decaying(%f, %f, %f)", mu, sigma, rate) , 
                             "long-term" = sprintf("risk_model_long_term(%f, %f)", rate, delay))
 
+    # Generate a single drug-ADR pair
     cohort <- generate_cohort(
       n_patients = n_patients,
       simulation_time = simulation_time,
@@ -37,5 +37,6 @@ simulator_wrapper <-
       verbose = FALSE
     )
     
+    # Return the only drug-ADR pair
     return(cohort[[1]])
   }
