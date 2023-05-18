@@ -25,7 +25,7 @@ test_run <- FALSE
 if (test_run) { 
   repls <- 1
 } else { 
-  repls <- 100
+  repls <- 50
 }
 
 # Setting up the repository ---------

@@ -202,6 +202,7 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
 
 # ------------------------------------------------------------------------------
 # plot perfect score confusion matrix plot
+# ------------------------------------------------------------------------------
 perfect <- confusion_matrices[[1]]
 perfect[] <- 0
 
@@ -227,6 +228,10 @@ p <- plot_confusion_matrix(perfect, title = "Confusion matrix with a perfect sco
 ggsave("figures/confusion-matrix_perfect.pdf", plot = p, width = 10, height = 6)
 
 
+# ------------------------------------------------------------------------------
+# Plot the true risk models 
+# ------------------------------------------------------------------------------
+source("plot-all-true-risk-models.R")
 
 # ------------------------------------------------------------------------------
 # Get performance measures binary
