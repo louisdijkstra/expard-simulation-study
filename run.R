@@ -25,7 +25,7 @@ test_run <- FALSE
 if (test_run) { 
   repls <- 1
 } else { 
-  repls <- 50
+  repls <- 20
 }
 
 # Setting up the repository ---------
@@ -77,7 +77,6 @@ addExperiments(prob_design, algo_design, repls = repls)
 
 ### submit 
 ids <- findNotStarted()
-#submitJobs(ids = 1:4)
 if (grepl("node\\d{2}|bipscluster", system("hostname", intern = TRUE))) {
   ids <- findNotStarted()
   ids[, chunk := chunk(job.id, chunk.size = 50)]
