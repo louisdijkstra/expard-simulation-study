@@ -1,5 +1,7 @@
 #' Script for loading registry and checking whether there are any errors
 
+library(batchtools)
+
 #' Name of the repository
 reg_name <- "analysis"
 
