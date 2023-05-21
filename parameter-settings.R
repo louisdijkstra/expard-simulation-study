@@ -2,7 +2,7 @@
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- TRUE
+test_run <- FALSE
 
 #' Parameter settings for the algorithms ------------------
 algo_param <- data.frame(
@@ -130,7 +130,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   only_sim_param <- dplyr::as_tibble(
     expand.grid(
-      n_patients = c(100, 1000),
+      n_patients = c(1000),
       simulation_time = c(100),  
       prob_exposed = c(0.01,0.05), 
       avg_duration = c(5), 
