@@ -133,7 +133,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
     expand.grid(
       n_patients = c(100, 1000),
       simulation_time = c(100),  
-      min_chance_drug = c(0.05), 
+      min_chance_drug = c(0.01,0.05), 
       avg_duration = c(5), 
       prob_guaranteed_exposed = c(0), 
       min_chance = c(.01, 0.05), 
