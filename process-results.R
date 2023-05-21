@@ -129,9 +129,8 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
   # filter for the relevant results
   temp <- truth %>% filter(n_patients == only_sim_param$n_patients[i],
                            simulation_time == only_sim_param$simulation_time[i], 
-                           min_chance_drug == only_sim_param$min_chance_drug[i], 
+                           prob_exposed == only_sim_param$prob_exposed[i], 
                            avg_duration == only_sim_param$avg_duration[i], 
-                           prob_guaranteed_exposed == only_sim_param$prob_guaranteed_exposed[i],
                            min_chance == only_sim_param$min_chance[i],
                            max_chance == only_sim_param$max_chance[i])  
   
@@ -170,17 +169,12 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
   simulation_time <- only_sim_param$simulation_time[i] 
   min_chance_drug <- only_sim_param$min_chance_drug[i] 
   avg_duration <- only_sim_param$avg_duration[i] 
-  prob_guaranteed_exposed <- only_sim_param$prob_guaranteed_exposed[i]
+  prob_exposed <- only_sim_param$probexposed[i]
   min_chance <- only_sim_param$min_chance[i]
   max_chance <- only_sim_param$max_chance[i]
   
-  if (prob_guaranteed_exposed == 1) {
-    title <- sprintf("No. patients = %d (all prescribed), Min./Max. Risk = %g/%g", n_patients, 
-                     min_chance, max_chance)
-  } else {
-    title <- sprintf("No. patients = %d, At least %d patients prescribed, Min./Max. Risk = %g/%g", n_patients, 
-                   n_patients * prob_guaranteed_exposed, min_chance, max_chance)
-  }
+  title <- sprintf("No. patients = %d, Prob. exposed: %g, Min/Max Risk = %g/%g", n_patients, prob_exposed,
+                   min_chance, max_chance)
   
   filename <-
     sprintf(

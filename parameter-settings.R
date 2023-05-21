@@ -2,7 +2,7 @@
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- FALSE
+test_run <- TRUE
 
 #' Parameter settings for the algorithms ------------------
 algo_param <- data.frame(
@@ -15,13 +15,12 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   only_sim_param <- dplyr::as_tibble(
     expand.grid(
-      n_patients = c(10, 20),
-      simulation_time = c(20),  
-      min_chance_drug = c(0.05), 
+      n_patients = c(1000),
+      simulation_time = c(100),  
+      prob_exposed = c(0.01), 
       avg_duration = c(5), 
-      prob_guaranteed_exposed = c(1), 
-      min_chance = c(0.05), 
-      max_chance = c(.9)
+      min_chance = c(1e-5), 
+      max_chance = c(.1)
     )
   )
   
@@ -133,11 +132,10 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
     expand.grid(
       n_patients = c(100, 1000),
       simulation_time = c(100),  
-      min_chance_drug = c(0.01,0.05), 
+      prob_exposed = c(0.01,0.05), 
       avg_duration = c(5), 
-      prob_guaranteed_exposed = c(0), 
-      min_chance = c(.01, 0.05), 
-      max_chance = c(.1, .5, .9)
+      min_chance = c(1e-4, 5e-4), 
+      max_chance = c(.1)
     )
   )
   

@@ -7,10 +7,13 @@ simulator_wrapper <-
   function(job, data, 
            risk_model, past, rate, mu, sigma, delay,
            n_patients, simulation_time, 
-           min_chance_drug, avg_duration, 
-           prob_guaranteed_exposed, min_chance, max_chance, 
+           prob_exposed, avg_duration, 
+           min_chance, max_chance, 
            sim_param_id 
            ) {
+    
+    # determine min chance drug given chance patient is exposed
+    min_chance_drug <- 1 - (1 - prob_exposed)^(1/simulation_time)
     
     # first determine the risk model 
     risk_model_fn <- switch(as.character(risk_model), 
@@ -31,7 +34,7 @@ simulator_wrapper <-
       risk_model = risk_model_fn,
       min_chance_drug = min_chance_drug,
       avg_duration = avg_duration,
-      prob_guaranteed_exposed = prob_guaranteed_exposed,
+      prob_guaranteed_exposed = 0,
       min_chance = min_chance,
       max_chance = max_chance,
       verbose = FALSE
