@@ -167,9 +167,8 @@ plot_confusion_matrix(conf_matrix = confusion_matrices[[1]], title = "title")
 plots <- lapply(1:nrow(only_sim_param), function(i) { 
   n_patients <- only_sim_param$n_patients[i]
   simulation_time <- only_sim_param$simulation_time[i] 
-  min_chance_drug <- only_sim_param$min_chance_drug[i] 
   avg_duration <- only_sim_param$avg_duration[i] 
-  prob_exposed <- only_sim_param$probexposed[i]
+  prob_exposed <- only_sim_param$prob_exposed[i]
   min_chance <- only_sim_param$min_chance[i]
   max_chance <- only_sim_param$max_chance[i]
   
@@ -178,12 +177,11 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
   
   filename <-
     sprintf(
-      "figures/confusion_matrix_%d_%d_%g_%g_%g_%g_%g.pdf",
+      "figures/confusion_matrix_%d_%d_%g_%g_%g_%g.pdf",
       n_patients                     ,
       simulation_time,
-      min_chance_drug          ,
-      avg_duration             ,
-      prob_guaranteed_exposed,
+      prob_exposed,
+      avg_duration,
       min_chance,
       max_chance
     )
