@@ -19,7 +19,7 @@ source("parameter-settings.R")
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- TRUE
+test_run <- FALSE
 
 # Total number of replications for each parameter setting
 if (test_run) { 
@@ -32,7 +32,7 @@ if (test_run) {
 
 #' WARNING: If TRUE, removes the current repository and creates a new one. Used 
 #' for debugging as well 
-start_from_scratch <- TRUE 
+start_from_scratch <- FALSE
 
 #' Name of the repository
 reg_name <- "analysis"

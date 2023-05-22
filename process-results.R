@@ -155,6 +155,8 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
   )
   
   for (j in 1:nrow(temp)) { 
+    print(temp$truth_label[j])
+    print(temp$selected_label[j])
     index_truth <- revert_to_index(temp$truth_label[j], TRUE)
     index_selected <- revert_to_index(temp$selected_label[j], FALSE)
     confusion_matrix[index_selected, index_truth] <- confusion_matrix[index_selected, index_truth] + 1
