@@ -19,7 +19,7 @@ source("parameter-settings.R")
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- FALSE
+test_run <- TRUE
 
 # Total number of replications for each parameter setting
 if (test_run) { 

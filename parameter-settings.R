@@ -2,7 +2,7 @@
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- FALSE
+test_run <- TRUE
 
 #' Parameter settings for the algorithms ------------------
 algo_param <- data.frame(
