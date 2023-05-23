@@ -135,7 +135,7 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
       prob_exposed = c(0.01,0.05,.1), 
       avg_duration = c(5), 
       min_chance = c(1e-4, 5e-4), 
-      max_chance = c(.1)
+      max_chance = c(.1,.2)
     )
   )
   
