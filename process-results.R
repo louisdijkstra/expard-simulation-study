@@ -234,9 +234,8 @@ source("plot-all-true-risk-models.R")
 performances_per_simulation_setting = lapply(1:nrow(only_sim_param), function(i) { 
   temp <- truth %>% filter(n_patients == only_sim_param$n_patients[i],
                            simulation_time == only_sim_param$simulation_time[i], 
-                           min_chance_drug == only_sim_param$min_chance_drug[i], 
+                           prob_exposed == only_sim_param$prob_exposed[i], 
                            avg_duration == only_sim_param$avg_duration[i], 
-                           prob_guaranteed_exposed == only_sim_param$prob_guaranteed_exposed[i],
                            min_chance == only_sim_param$min_chance[i],
                            max_chance == only_sim_param$max_chance[i])  
   temp_results <- hmeasure::HMeasure(temp$effect, temp$signal)
