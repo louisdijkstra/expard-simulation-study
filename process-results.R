@@ -4,6 +4,7 @@ library(hmeasure)
 library(caret)
 library(reshape2)
 library(ggplot2)
+library(latex2exp)
 
 # LOAD THE DATA ----------------------------------------------------------------
 
@@ -60,7 +61,7 @@ return_true_risk_model_label <- function(row_results) {
   switch(as.character(row_results$risk_model), 
          'no-association' = "no assocation", 
          'current-use' = "current use", 
-         'past-use' = sprintf("past use (delay = %d)", row_results$past),
+         'past-use' = sprintf("past use (past = %d)", row_results$past),
          'withdrawal' = sprintf("withdrawal (rate = %g)", row_results$rate),
          'delayed' = sprintf("delayed (delay = %d, std = %d)", row_results$mu, row_results$sigma),
          'decaying' = sprintf("decaying (rate = %g)", row_results$rate),
@@ -142,8 +143,8 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
   colnames(confusion_matrix) <- c(
     "no assocation",
     "current use"     ,
-    "past use (delay = 5)",
-    "past use (delay = 10)" ,
+    "past use (past = 5)",
+    "past use (past = 10)" ,
     "withdrawal (rate = 0.5)" ,
     "withdrawal (rate = 1)"     ,
     "delayed (delay = 2, std = 2)",
@@ -161,7 +162,14 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
     index_selected <- revert_to_index(temp$selected_label[j], FALSE)
     confusion_matrix[index_selected, index_truth] <- confusion_matrix[index_selected, index_truth] + 1
   }
-  confusion_matrix / n_replications * 100
+  
+  # if you want percentages return this: 
+  # return(confusion_matrix / n_replications * 100)
+  
+  # if you want to fill in the zero values in the plots as well, return: 
+  return(confusion_matrix) 
+  
+  confusion_matrix[confusion_matrix == 0] <- NA
 })
 
 plot_confusion_matrix(conf_matrix = confusion_matrices[[1]], title = "title")
@@ -174,8 +182,8 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
   min_chance <- only_sim_param$min_chance[i]
   max_chance <- only_sim_param$max_chance[i]
   
-  title <- sprintf("No. patients = %d, Prob. exposed: %g, Min/Max Risk = %g/%g", n_patients, prob_exposed,
-                   min_chance, max_chance)
+  title <- TeX(sprintf("Probability exposed = $%g$, $\\pi_{{ij}}^{+} = %g$, $\\pi_{{ij}}^{-} = %g$", prob_exposed,
+                   max_chance, min_chance))
   
   filename <-
     sprintf(
@@ -188,15 +196,19 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
       max_chance
     )
   
-  p <- plot_confusion_matrix(confusion_matrices[[i]], title = title)
+  p <- plot_confusion_matrix(confusion_matrices[[i]], title = title, 
+                             add_legend = FALSE, 
+                             leave_out_zero_values =  TRUE)
   
-  ggsave(filename, plot = p, width = 10, height = 6)
+  ggsave(filename, plot = p, width = 7, height = 6)
   return(p)
 })
 
 # ------------------------------------------------------------------------------
 # plot perfect score confusion matrix plot
 # ------------------------------------------------------------------------------
+n_replications <- 20
+
 perfect <- confusion_matrices[[1]]
 perfect[] <- 0
 
@@ -215,7 +227,7 @@ perfect[6,10] <- 1
 perfect[7,11] <- 1
 perfect[8,12] <- 1
 
-perfect <- perfect * 100 
+perfect <- perfect * n_replications
 
 p <- plot_confusion_matrix(perfect, title = "Confusion matrix with a perfect score")
 
