@@ -10,7 +10,7 @@ colnames(parameter_settings) <- c('N', 'T', 'prob_exposed', 'min_chance', 'max_c
 
 parameter_settings$filename <- paste0('data/', list.files(path = "data/"))
 
-parameter_settings$max_chance <- sapply(data$max_chance, function(x) as.numeric(str_split(x, ".rds")[[1]][1]))
+parameter_settings$max_chance <- sapply(parameter_settings$max_chance, function(x) as.numeric(str_split(x, ".rds")[[1]][1]))
 
 parameter_settings$id <- 1:nrow(parameter_settings)
 

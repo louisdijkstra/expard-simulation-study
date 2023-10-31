@@ -9,10 +9,7 @@ library(shinyjs)
 library(readr)
 library(dplyr)
 library(ggplot2)
-library(latex2exp)
-library(gtable)
-library(gridExtra)
-library(grid)
+library(stringr)
 
 # Get all the parameter settings from the files in the data/ folder ---
 cat("Getting parameter settings and loading the data from the data/ folder\n")
