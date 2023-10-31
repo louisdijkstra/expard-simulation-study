@@ -253,6 +253,8 @@ performances_per_simulation_setting = lapply(1:nrow(only_sim_param), function(i)
                            avg_duration == only_sim_param$avg_duration[i], 
                            min_chance == only_sim_param$min_chance[i],
                            max_chance == only_sim_param$max_chance[i])  
+  
+  temp <- temp[1:240, ]
   temp_results <- hmeasure::HMeasure(temp$effect, temp$signal)
   temp_results$metrics
 })
