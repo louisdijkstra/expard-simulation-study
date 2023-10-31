@@ -25,14 +25,14 @@ test_run <- FALSE
 if (test_run) { 
   repls <- 1
 } else { 
-  repls <- 20
+  repls <- 100
 }
 
 # Setting up the repository ---------
 
 #' WARNING: If TRUE, removes the current repository and creates a new one. Used 
 #' for debugging as well 
-start_from_scratch <- FALSE
+start_from_scratch <- TRUE
 
 #' Name of the repository
 reg_name <- "analysis"
