@@ -5,6 +5,7 @@ library(caret)
 library(reshape2)
 library(ggplot2)
 library(latex2exp)
+library(stringr)
 
 # LOAD THE DATA ----------------------------------------------------------------
 
@@ -125,6 +126,7 @@ revert_to_index <- function(label, truth = TRUE) {
   return(index)
 }
 
+
 # go over all settings
 confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) { 
   # filter for the relevant results
@@ -134,6 +136,8 @@ confusion_matrices <- lapply(1:nrow(only_sim_param), function(i) {
                            avg_duration == only_sim_param$avg_duration[i], 
                            min_chance == only_sim_param$min_chance[i],
                            max_chance == only_sim_param$max_chance[i])  
+  
+  temp <- temp[1:240, ]
   
   n_replications <- nrow(temp) / 12
   
@@ -200,7 +204,14 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
                              add_legend = FALSE, 
                              leave_out_zero_values =  TRUE)
   
+  
   ggsave(filename, plot = p, width = 7, height = 6)
+  
+  # save rds
+  filename <- stringr::str_replace(filename, ".pdf", ".rds")
+  
+  readr::write_rds(p, filename)
+  
   return(p)
 })
 
@@ -250,6 +261,8 @@ performances_per_simulation_setting = lapply(1:nrow(only_sim_param), function(i)
                            avg_duration == only_sim_param$avg_duration[i], 
                            min_chance == only_sim_param$min_chance[i],
                            max_chance == only_sim_param$max_chance[i])  
+  
+  temp <- temp[1:240, ]
   temp_results <- hmeasure::HMeasure(temp$effect, temp$signal)
   temp_results$metrics
 })
