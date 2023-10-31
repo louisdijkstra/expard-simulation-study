@@ -1,4 +1,4 @@
-#' Shiny App for the KiKme dataset 
+#' Shiny App for Exposure Model paper
 
 rm(list = ls())
 
