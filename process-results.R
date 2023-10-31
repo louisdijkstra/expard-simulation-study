@@ -5,6 +5,7 @@ library(caret)
 library(reshape2)
 library(ggplot2)
 library(latex2exp)
+library(stringr)
 
 # LOAD THE DATA ----------------------------------------------------------------
 
@@ -203,7 +204,14 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
                              add_legend = FALSE, 
                              leave_out_zero_values =  TRUE)
   
+  
   ggsave(filename, plot = p, width = 7, height = 6)
+  
+  # save rds
+  filename <- stringr::str_replace(filename, ".pdf", ".rds")
+  
+  readr::write_rds(p, filename)
+  
   return(p)
 })
 
