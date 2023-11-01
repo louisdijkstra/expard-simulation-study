@@ -5,6 +5,9 @@ library(dplyr)
 library(readr)
 library(hmeasure)
 library(expard)
+library(tictoc)
+
+tic()
 
 options(batchtools.verbose = TRUE)
 options(stringsAsFactors = FALSE)
@@ -19,13 +22,13 @@ source("parameter-settings.R")
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- FALSE
+test_run <- TRUE
 
 # Total number of replications for each parameter setting
 if (test_run) { 
   repls <- 1
 } else { 
-  repls <- 100
+  repls <- 20
 }
 
 # Setting up the repository ---------
@@ -85,21 +88,24 @@ if (grepl("node\\d{2}|bipscluster", system("hostname", intern = TRUE))) {
                               memory = 80000, walltime = 10*24*3600,
                               max.concurrent.jobs = max.concurrent.jobs))
 } else {
-  submitJobs(ids = ids)
+  ids <- findNotStarted()
+  ids[, chunk := chunk(job.id, chunk.size = 10)]
+  resources <- list(name = reg_name, chunks.as.arrayjobs = TRUE, max.concurrent.jobs = 20)
+  submitJobs(ids = ids, resources = resources)
 }
 
 waitForJobs()
-
+toc()
 
 #' COLLECT THE RESULTS --------------------------------------------------------- 
 
-results <- list(
-  truth = unwrap(getJobPars()), 
-  estimates = reduceResultsList() 
-)
-
-# store these results
-readr::write_rds(results, "results/raw-results.rds", compress = "gz")
-
-# post-process the results
-source("process-results.R")
+# results <- list(
+#   truth = unwrap(getJobPars()), 
+#   estimates = reduceResultsList() 
+# )
+# 
+# # store these results
+# readr::write_rds(results, "results/raw-results.rds", compress = "gz")
+# 
+# # post-process the results
+# source("process-results.R")

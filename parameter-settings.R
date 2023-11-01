@@ -2,7 +2,7 @@
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- FALSE
+test_run <- TRUE
 
 #' Parameter settings for the algorithms ------------------
 algo_param <- data.frame(
@@ -132,10 +132,10 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
     expand.grid(
       n_patients = c(1000),
       simulation_time = c(100),  
-      prob_exposed = c(0.01,0.05,.1,.5), 
+      prob_exposed = c(0.01,0.1,.5), 
       avg_duration = c(5), 
-      min_chance = c(1e-4, 5e-4), 
-      max_chance = c(.1,.2,.3)
+      min_chance = c(1e-4, 1e-3), 
+      max_chance = c(.01,.1,.2)
     )
   )
   
