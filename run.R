@@ -1,6 +1,4 @@
 library(batchtools)
-library(CVN) 
-library(CVNSim)
 library(dplyr)
 library(readr)
 library(hmeasure)
