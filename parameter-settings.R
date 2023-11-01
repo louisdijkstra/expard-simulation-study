@@ -15,8 +15,8 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
   
   only_sim_param <- dplyr::as_tibble(
     expand.grid(
-      n_patients = c(1000),
-      simulation_time = c(100),  
+      n_patients = c(20),
+      simulation_time = c(10),  
       prob_exposed = c(0.01), 
       avg_duration = c(5), 
       min_chance = c(1e-5), 

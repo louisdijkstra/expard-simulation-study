@@ -54,6 +54,10 @@ if (start_from_scratch) { # remove any previously existing registry and start a 
   dir.create("registries", showWarnings = FALSE)
   unlink(reg_dir, recursive = TRUE)
   reg <- makeExperimentRegistry(file.dir = reg_dir, packages = packages, source = source)      
+  reg$cluster.functions = makeClusterFunctionsInteractive()
+
+  # Change packages to load
+  saveRegistry(reg = reg)
 } else { 
   reg <- loadRegistry(file.dir = reg_dir, writeable = TRUE)
 }
@@ -87,9 +91,10 @@ if (grepl("node\\d{2}|bipscluster", system("hostname", intern = TRUE))) {
                               max.concurrent.jobs = max.concurrent.jobs))
 } else {
   ids <- findNotStarted()
-  ids[, chunk := chunk(job.id, chunk.size = 10)]
-  resources <- list(name = reg_name, chunks.as.arrayjobs = TRUE, max.concurrent.jobs = 20)
+  #ids[, chunk := chunk(job.id, chunk.size = 7)]
+  resources <- list(name = reg_name, max.concurrent.jobs = 20)
   submitJobs(ids = ids, resources = resources)
+  #submitJobs(ids = ids)
 }
 
 waitForJobs()
@@ -97,10 +102,10 @@ toc()
 
 #' COLLECT THE RESULTS --------------------------------------------------------- 
 
-# results <- list(
-#   truth = unwrap(getJobPars()), 
-#   estimates = reduceResultsList() 
-# )
+results <- list(
+  truth = unwrap(getJobPars()),
+  estimates = reduceResultsList()
+)
 # 
 # # store these results
 # readr::write_rds(results, "results/raw-results.rds", compress = "gz")
