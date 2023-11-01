@@ -5,8 +5,6 @@ library(hmeasure)
 library(expard)
 library(tictoc)
 
-tic()
-
 options(batchtools.verbose = TRUE)
 options(stringsAsFactors = FALSE)
 
@@ -20,7 +18,7 @@ source("parameter-settings.R")
 
 #' For debugging. Only a limited number of parameter settings is used, see 
 #' parameter-settings.R. Only 
-test_run <- TRUE
+test_run <- FALSE
 
 # Total number of replications for each parameter setting
 if (test_run) { 
@@ -98,7 +96,6 @@ if (grepl("node\\d{2}|bipscluster", system("hostname", intern = TRUE))) {
 }
 
 waitForJobs()
-toc()
 
 #' COLLECT THE RESULTS --------------------------------------------------------- 
 
@@ -106,9 +103,9 @@ results <- list(
   truth = unwrap(getJobPars()),
   estimates = reduceResultsList()
 )
-# 
-# # store these results
-# readr::write_rds(results, "results/raw-results.rds", compress = "gz")
-# 
-# # post-process the results
-# source("process-results.R")
+
+# store these results
+readr::write_rds(results, "results/raw-results.rds", compress = "gz")
+
+# post-process the results
+source("process-results.R")
