@@ -14,7 +14,7 @@ tabConfusionMatrix <- tabPanel("Confusion Matrix",
                          # Select the probability exposed  -----
                          sliderTextInput(
                            inputId = "min_chance",
-                           label = "\\(\\tau_{ij}^{-}\\)", 
+                           label = "\\(\\pi_{ij}^{-}\\)", 
                            choices = parameter_settings$min_chance %>% unique() %>% sort(),
                            grid = TRUE
                          ),
@@ -22,7 +22,7 @@ tabConfusionMatrix <- tabPanel("Confusion Matrix",
                          # Select the probability exposed  -----
                          sliderTextInput(
                            inputId = "max_chance",
-                           label = "\\(\\tau_{ij}^{+}\\)", 
+                           label = "\\(\\pi_{ij}^{+}\\)", 
                            choices = parameter_settings$max_chance %>% unique() %>% sort(),
                            grid = TRUE
                          ),
