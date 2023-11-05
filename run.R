@@ -31,7 +31,7 @@ if (test_run) {
 
 #' WARNING: If TRUE, removes the current repository and creates a new one. Used 
 #' for debugging as well 
-start_from_scratch <- TRUE
+start_from_scratch <- FALSE
 
 #' Name of the repository
 reg_name <- "analysis"
