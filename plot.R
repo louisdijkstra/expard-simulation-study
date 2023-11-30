@@ -33,8 +33,8 @@ plot_confusion_matrix <- function(conf_matrix,
                                     linetype = 2), 
           panel.border = element_rect(colour = "black", fill=NA, size=.5),
           panel.grid.minor = element_line(colour = "black", size = 5, linetype = 1) , 
-          axis.text.y = element_text(angle=45),
-          axis.text.x = element_text(angle=45, hjust=1,vjust=1),
+          axis.text.y = element_text(angle=0),
+          axis.text.x = element_text(angle=30, hjust=1,vjust=1),
           plot.margin=grid::unit(c(0,0,0,0), "mm")) +
     coord_fixed() 
   

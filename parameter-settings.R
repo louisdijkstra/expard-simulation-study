@@ -132,21 +132,21 @@ if (test_run) { # simplify the parameters for a test run - this is debugging
     expand.grid(
       n_patients = c(1000),
       simulation_time = c(100),  
-      prob_exposed = c(0.01, 0.05, 0.1,.5), 
+      prob_exposed = c(0.01, 0.1,.5), 
       avg_duration = c(5), 
-      min_chance = c(1e-4, 5*1e-4, 1e-3), 
+      min_chance = c(1e-4, 1e-3), 
       max_chance = c(.01,.1,.2,.3)
     )
   )
   
-  only_sim_param <- dplyr::tibble(
-      n_patients = c(1000),
-      simulation_time = c(100),  
-      prob_exposed = c(0.05, 0.05, 0.05, 0.01, 0.01, 0.1, 0.1, 0.5), 
-      avg_duration = c(5), 
-      min_chance = c(1e-3, 5*1e-4, 1e-4, 5*1e-4, 1e-3, 5*1e-4, 1e-3, 1e-3), 
-      max_chance = c(.3, .01, 0.01, 0.01, .3, 0.01, .3, .3)
-  )
+  # only_sim_param <- dplyr::tibble(
+  #     n_patients = c(1000),
+  #     simulation_time = c(100),  
+  #     prob_exposed = c(0.05, 0.05, 0.05, 0.01, 0.01, 0.1, 0.1, 0.5), 
+  #     avg_duration = c(5), 
+  #     min_chance = c(1e-3, 5*1e-4, 1e-4, 5*1e-4, 1e-3, 5*1e-4, 1e-3, 1e-3), 
+  #     max_chance = c(.3, .01, 0.01, 0.01, .3, 0.01, .3, .3)
+  # )
   
   risk_models <- dplyr::tibble(
     risk_model = c(

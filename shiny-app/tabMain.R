@@ -2,9 +2,9 @@ tabMain <- tabPanel("Main",
                     withMathJax(),
                     sidebarLayout(
                       sidebarPanel(
-                        p(strong("TODO: Title"),
-                          p("L. Dijkstra, R. Foraita"),
-                          em("To be Submitted")#,
+                        p(strong("An Exposure Model Framework for Signal Detection based on Electronic Healthcare Data"),
+                          #p("L. Dijkstra, R. Foraita"),
+                          p(em("To be Submitted"))#,
                           #p(strong("DOI:"),"10.1002/PDS.4970"),
                         )
                       )

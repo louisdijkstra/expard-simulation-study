@@ -22,8 +22,8 @@ est   <- data$estimates
 
 # Function for selecting the model based on the highest posterior distribution
 select_best_model_given_posterior <- function(est) { 
-  temp <- est %>% filter(posterior == max(est$posterior)) 
-  #temp <- est %>% filter(loglikelihood == min(est$loglikelihood)) 
+  # temp <- est %>% filter(posterior == max(est$posterior)) 
+  temp <- est %>% filter(loglikelihood == min(est$loglikelihood)) 
   if (nrow(temp) == 0) { 
     return("no-association")
   }
@@ -54,7 +54,8 @@ truth$effect <- sapply(truth$risk_model, function(m) return(m != "no-association
 truth$selected_model <- sapply(est, function(e) select_best_model_given_posterior(e))
 
 # determine whether there is a signal or not based on posterior distribution
-truth$signal <- sapply(est, function(e) signal_yes_or_no(e))
+# truth$signal <- sapply(est, function(e) signal_yes_or_no(e))
+truth$signal <- truth$selected_model != 'no-association'
 
 # ADD LABELS -------------------------------------------------------------------
 
@@ -188,7 +189,7 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
   max_chance <- only_sim_param$max_chance[i]
   
   title <- TeX(sprintf("Probability exposed = $%g$, $\\pi_1 = %g$, $\\pi_0 = %g$", prob_exposed,
-                   max_chance, min_chance))
+                       max_chance, min_chance))
   
   filename <-
     sprintf(
@@ -206,7 +207,7 @@ plots <- lapply(1:nrow(only_sim_param), function(i) {
                              leave_out_zero_values =  TRUE)
   
   
-  ggsave(filename, plot = p, width = 6, height = 4)
+  ggsave(filename, plot = p, width = 7, height = 6)
   
   # save rds
   filename <- stringr::str_replace(filename, ".pdf", ".rds")
@@ -241,9 +242,9 @@ perfect[8,12] <- 1
 
 perfect <- perfect * n_replications
 
-p <- plot_confusion_matrix(perfect, title = "Ideal confusion matrix")
+p <- plot_confusion_matrix(perfect, title = "Confusion matrix with a perfect score")
 
-ggsave("figures/confusion-matrix_perfect.png", plot = p, width = 6, height = 4)
+ggsave("figures/confusion-matrix_perfect.pdf", plot = p, width = 10, height = 6)
 
 
 # ------------------------------------------------------------------------------
@@ -274,4 +275,4 @@ rownames(performance) <- NULL
 # combine performance metrics with the simulation parameter settings
 performance <- cbind(only_sim_param, performance)
 
-readr::write_rds(performance, "results/overall-performance.rds")
+readr::write_rds(performance, "results/overall-performance-loglikelihood.rds")
