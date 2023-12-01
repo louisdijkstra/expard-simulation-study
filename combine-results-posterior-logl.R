@@ -1,3 +1,5 @@
+# Create the performance table for signal detection. We consider here the 
+# log-likelihood to select the best model. The output is a LaTeX table
 
 library(readr)
 library(expard)

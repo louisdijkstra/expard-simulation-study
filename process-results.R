@@ -1,3 +1,5 @@
+# Process the results of the simulation study
+
 library(readr)
 library(dplyr)
 library(hmeasure)

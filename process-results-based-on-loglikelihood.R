@@ -1,3 +1,7 @@
+# Exactly the same as process results, but this time we use the log-likelihood
+# to select the best fitting model. These results are currently not shown in the 
+# paper
+
 library(readr)
 library(dplyr)
 library(hmeasure)
