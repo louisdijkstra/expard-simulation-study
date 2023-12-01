@@ -15,8 +15,7 @@ tabMain <- tabPanel("Main",
                           for the exposure model simulation study. See for a detailed 
                           description our paper.")  ,
                         h4("Software"),
-                        p("The R code used for this project is publicly available under the
-                            GPL-3 license and can be found at: "), 
+                        p("The R code used for this project is publicly available and can be found at: "), 
                         tags$ul(
                           tags$li(
                             a("expard", href="https://github.com/bips-hb/expard"),

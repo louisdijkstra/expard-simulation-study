@@ -10,14 +10,20 @@ library(readr)
 library(dplyr)
 library(ggplot2)
 library(stringr)
+library(reshape2)
+library(latex2exp)
 
 # Get all the parameter settings from the files in the data/ folder ---
 cat("Getting parameter settings and loading the data from the data/ folder\n")
+source("parameter-settings.R")
 source("loadData.R")
 
 # Load the individual tabs ---
 source("tabMain.R")
 source("tabConfusionMatrix.R")
+
+# Load plot function
+source("plot.R")
 
 # Define UI ----
 ui <- fluidPage(
